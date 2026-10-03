@@ -1,0 +1,45 @@
+{
+  "name": "telegram-rma",
+  "version": "1.2.0",
+  "description": "Telegram 資源管理助手(Telegram Resource Management Assistant / Telegram-RMA)—— 對話瀏覽 / 批量下載 / 轉發 / 檢索 / 匯出 / 自動化",
+  "author": "Telegram-RMA",
+  "license": "MIT",
+  "main": "./out/main/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "node scripts/run.mjs dev",
+    "dev:debug": "node scripts/run.mjs dev debug",
+    "build": "electron-vite build",
+    "preview": "node scripts/run.mjs preview",
+    "start": "node scripts/run.mjs preview",
+    "icon": "node scripts/make-icon.mjs",
+    "dist": "electron-vite build && electron-builder --win"
+  },
+  "dependencies": {
+    "@mtcute/convert": "^0.30.3",
+    "big-integer": "^1.6.52",
+    "electron-store": "^8.2.0",
+    "exceljs": "^4.4.0",
+    "lucide-vue-next": "^1.0.0",
+    "naive-ui": "^2.44.1",
+    "node-cron": "^4.4.1",
+    "pinia": "^3.0.4",
+    "plyr": "^3.8.4",
+    "qrcode": "^1.5.4",
+    "telegram": "^2.26.22",
+    "vue": "^3.5.38",
+    "vue-router": "^5.1.0",
+    "vue-virtual-scroller": "^3.0.4"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "@tailwindcss/vite": "^4.3.2",
+    "@vitejs/plugin-vue": "^6.0.7",
+    "electron": "^42.4.1",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^5.0.0",
+    "png-to-ico": "^3.0.1",
+    "tailwindcss": "^4.3.2",
+    "vite": "^7.3.5"
+  }
+}

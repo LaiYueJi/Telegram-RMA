@@ -1,0 +1,10 @@
+node_modules/
+out/
+dist/
+*.log
+.DS_Store
+*.part
+.env
+__MACOSX/
+# 第三方設計素材，只用來產生 src/renderer/src/data/gradients.js
+Webgradients for Sketch/

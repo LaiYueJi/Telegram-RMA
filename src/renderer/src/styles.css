@@ -1,0 +1,406 @@
+/* Tailwind CSS 4:只載 theme + utilities 層,跳過 preflight —— 避免與 naive-ui 的
+   CSS-in-JS 及下方既有的 *{box-sizing} reset 打架。 */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+:root,
+:root[data-theme='dark'] {
+  --bg-0: #0b1220;
+  --app-bg: var(--bg-0); /* 主內容區背景畫布;背景漸層主題會以 inline 變數覆寫此值 */
+  --bg-1: #111a2e;
+  --bg-2: #16223c;
+  --bg-3: #1d2c4d;
+  --border: #243456;
+  --text-0: #e6edf7;
+  --text-1: #9fb0cc;
+  --text-2: #6b7c9c;
+  --accent: #5b6cff;
+  --accent-2: #7c5cff;
+  --green: #2bbf7a;
+  --neon: #22ffa6; /* 亮綠色霓虹(頂部狀態燈) */
+  --amber: #f5a623;
+  --red: #e5484d;
+  --scrollbar-thumb: #2a3a5e;
+  --bubble-out: #2a3566;
+  --bubble-out-border: #36458a;
+  /* Netcatty 卡片質感 */
+  --radius-card: 14px;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px -16px rgba(0, 0, 0, 0.7);
+  --shadow-pop: 0 20px 60px rgba(0, 0, 0, 0.55);
+  --card-hi: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 42%);
+  --accent-grad: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+
+/* 亮色主題:整套自訂 CSS 變數同步切換(避免只有 naive-ui 元件變、底色不變) */
+:root[data-theme='light'] {
+  --bg-0: #eef1f7;
+  --app-bg: var(--bg-0);
+  --bg-1: #ffffff;
+  --bg-2: #f4f6fb;
+  --bg-3: #e6eaf3;
+  --border: #d6dcea;
+  --text-0: #16203a;
+  --text-1: #3c4866;
+  --text-2: #5e6a86;
+  --accent: #4a5be0;
+  --accent-2: #6d4fe6;
+  --green: #18a06a;
+  --neon: #06e08a; /* 亮綠色霓虹(淺色版) */
+  --amber: #d98a00;
+  --red: #d63b40;
+  --scrollbar-thumb: #c2cbdd;
+  --bubble-out: #dbe3ff;
+  --bubble-out-border: #c0ccf5;
+  --shadow-card: 0 1px 2px rgba(20, 30, 60, 0.06), 0 12px 34px -20px rgba(20, 30, 60, 0.28);
+  --shadow-pop: 0 24px 60px rgba(20, 30, 60, 0.18);
+  --card-hi: linear-gradient(180deg, rgba(255, 255, 255, 0.7), transparent 46%);
+  --accent-grad: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+
+/* toast(彈出通知)位置:固定貼在右上角視窗控制鈕(縮小/放大/關閉)的正下方。
+   以前是對著對話頁的工具列排的,換到其他頁就浮在奇怪的位置 → 改成只跟視窗邊界對齊,全頁一致。
+   naive 的 top-right 是「可捲動容器」:垂直位置其實由內部捲動內容的 padding-top 決定,容器 top 對它無效
+   (所以先前改 top 沒反應、改 right 有反應)。故水平用容器 right、垂直用 scrollbar-content 的 padding-top。
+   TopBar 高 48px,padding-top 給 52px = 剛好落在控制鈕下面留 4px 空隙。 */
+.n-notification-container {
+  top: 0 !important;
+  right: 10px !important;
+  left: auto !important;
+  bottom: auto !important;
+}
+.n-notification-container .n-scrollbar-content {
+  padding-top: 52px !important;
+}
+
+/* 背景漸層主題啟用時:把頂部列 / 側欄 / 對話列改半透明毛玻璃,讓底層漸層透到整個介面後面。
+   卡片/氣泡/彈窗維持不透明以保文字可讀。data-bgtheme 由 applyBackgroundTheme() 切換。 */
+:root[data-bgtheme='on'] .topbar,
+:root[data-bgtheme='on'] .sidenav,
+:root[data-bgtheme='on'] .dialoglist {
+  background: color-mix(in srgb, var(--bg-1) 58%, transparent) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+:root[data-bgtheme='on'] .pane-head {
+  background: color-mix(in srgb, var(--bg-1) 55%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* 把設計 token 映射到既有 CSS 變數。用 @theme inline → 產生的 utility 直接引用 var(--bg-1)
+   等,因此深/淺色切換即時生效、免重建。可用如 bg-surface / text-muted / border-line。 */
+@theme inline {
+  --color-bg0: var(--bg-0);
+  --color-surface: var(--bg-1);
+  --color-surface2: var(--bg-2);
+  --color-surface3: var(--bg-3);
+  --color-line: var(--border);
+  --color-ink: var(--text-0);
+  --color-ink2: var(--text-1);
+  --color-muted: var(--text-2);
+  --color-accent: var(--accent);
+  --color-accent2: var(--accent-2);
+  --color-ok: var(--green);
+  --color-warn: var(--amber);
+  --color-bad: var(--red);
+
+  --radius-card: 14px;
+  --shadow-card: var(--shadow-card);
+  --shadow-pop: var(--shadow-pop);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  height: 100%;
+  background: var(--bg-0);
+  color: var(--text-0);
+  font-family: 'Noto Sans TC', 'Microsoft JhengHei', 'PingFang TC', 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, #2a3a5e);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+.drag {
+  -webkit-app-region: drag;
+}
+
+/* ============ Netcatty 共用元件類 ============ */
+@layer components {
+  /* 卡片:表面色 + 1px 邊 + 柔和陰影 + 頂部高光 */
+  .nc-card {
+    position: relative;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+  .nc-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--card-hi);
+    pointer-events: none;
+  }
+  .nc-card > * {
+    position: relative;
+  }
+  .nc-hover {
+    transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+  }
+  .nc-hover:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+    box-shadow: var(--shadow-card), 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+
+  /* 狀態 pill */
+  .nc-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 20px;
+    padding: 0 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .nc-pill .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .nc-pill--ok {
+    color: var(--green);
+    background: color-mix(in srgb, var(--green) 14%, transparent);
+    border-color: color-mix(in srgb, var(--green) 40%, transparent);
+  }
+  .nc-pill--warn {
+    color: var(--amber);
+    background: color-mix(in srgb, var(--amber) 15%, transparent);
+    border-color: color-mix(in srgb, var(--amber) 42%, transparent);
+  }
+  .nc-pill--bad {
+    color: var(--red);
+    background: color-mix(in srgb, var(--red) 15%, transparent);
+    border-color: color-mix(in srgb, var(--red) 42%, transparent);
+  }
+  .nc-pill--accent {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 15%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 42%, transparent);
+  }
+  .nc-pill--idle {
+    color: var(--text-2);
+    background: color-mix(in srgb, var(--text-2) 14%, transparent);
+    border-color: color-mix(in srgb, var(--text-2) 32%, transparent);
+  }
+
+  /* 統計磚 */
+  .nc-stat {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    min-width: 0;
+  }
+  .nc-stat .k {
+    font-size: 11.5px;
+    color: var(--text-2);
+  }
+  .nc-stat .v {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.15;
+    margin-top: 2px;
+  }
+
+  /* 通用小按鈕(工具列 / 卡片動作) */
+  .nc-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 9px;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
+    color: var(--text-1);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.14s, border-color 0.14s, color 0.14s;
+    white-space: nowrap;
+  }
+  .nc-btn:hover {
+    color: var(--text-0);
+    border-color: var(--accent);
+    background: var(--bg-3);
+  }
+  .nc-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .nc-btn--primary {
+    border: none;
+    color: #fff;
+    background: var(--accent-grad);
+  }
+  .nc-btn--primary:hover {
+    filter: brightness(1.08);
+  }
+  .nc-btn--icon {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+  }
+  .nc-btn--danger:hover {
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  /* 段落式分頁(seg) */
+  .nc-seg {
+    display: inline-flex;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .nc-seg button {
+    height: 30px;
+    padding: 0 14px;
+    border: none;
+    background: transparent;
+    color: var(--text-1);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .nc-seg button.on {
+    background: var(--accent-grad);
+    color: #fff;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   Lucide 圖示 hover 動畫(邏輯在 iconAnim.js)
+   平常靜止;滑鼠移上去才播,移開會把當前這一輪跑完才停。
+   ══════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  .ic-anim > svg.lucide { animation: none !important; }
+}
+
+.ic-anim > svg.lucide-refresh-cw,
+.ic-anim > svg.lucide-rotate-cw,
+.ic-anim > svg.lucide-loader-circle { animation: ic-spin 0.9s linear infinite; }
+.ic-anim > svg.lucide-rotate-ccw { animation: ic-spin-back 0.9s linear infinite; }
+.ic-anim > svg.lucide-download,
+.ic-anim > svg.lucide-file-down,
+.ic-anim > svg.lucide-chevron-down { animation: ic-bob 0.8s ease-in-out infinite; }
+.ic-anim > svg.lucide-chevron-up { animation: ic-bob-up 0.8s ease-in-out infinite; }
+.ic-anim > svg.lucide-x { animation: ic-turn 0.7s ease-in-out infinite; }
+.ic-anim > svg.lucide-trash-2 { animation: ic-shake 0.7s ease-in-out infinite; }
+.ic-anim > svg.lucide-folder-open,
+.ic-anim > svg.lucide-clipboard-list,
+.ic-anim > svg.lucide-wallet { animation: ic-pop 0.8s ease-in-out infinite; }
+.ic-anim > svg.lucide-bell { animation: ic-swing 0.9s ease-in-out infinite; }
+.ic-anim > svg.lucide-play,
+.ic-anim > svg.lucide-forward,
+.ic-anim > svg.lucide-chevron-right { animation: ic-slide-r 0.7s ease-in-out infinite; }
+.ic-anim > svg.lucide-chevron-left { animation: ic-slide-l 0.7s ease-in-out infinite; }
+.ic-anim > svg.lucide-pause,
+.ic-anim > svg.lucide-message-circle { animation: ic-pulse 0.9s ease-in-out infinite; }
+.ic-anim > svg.lucide-maximize { animation: ic-pop 0.8s ease-in-out infinite; }
+.ic-anim > svg.lucide-menu,
+.ic-anim > svg.lucide-list { animation: ic-squeeze 0.8s ease-in-out infinite; }
+.ic-anim > svg.lucide-key-round,
+.ic-anim > svg.lucide-settings { animation: ic-spin 1.4s linear infinite; }
+.ic-anim > svg.lucide-search { animation: ic-nudge 0.8s ease-in-out infinite; }
+
+@keyframes ic-spin { to { transform: rotate(360deg); } }
+@keyframes ic-spin-back { to { transform: rotate(-360deg); } }
+@keyframes ic-bob {
+  0%, 100% { transform: translateY(0); }
+  45% { transform: translateY(3px); }
+}
+@keyframes ic-bob-up {
+  0%, 100% { transform: translateY(0); }
+  45% { transform: translateY(-3px); }
+}
+@keyframes ic-turn {
+  0%, 100% { transform: rotate(0); }
+  50% { transform: rotate(90deg); }
+}
+@keyframes ic-shake {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-12deg); }
+  75% { transform: rotate(12deg); }
+}
+@keyframes ic-pop {
+  0%, 100% { transform: scale(1) translateY(0); }
+  45% { transform: scale(1.14) translateY(-2px); }
+}
+@keyframes ic-swing {
+  0%, 100% { transform: rotate(0); }
+  30% { transform: rotate(-16deg); }
+  70% { transform: rotate(16deg); }
+}
+@keyframes ic-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.16); }
+}
+@keyframes ic-squeeze {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(0.72); }
+}
+@keyframes ic-slide-r {
+  0%, 100% { transform: translateX(0); }
+  45% { transform: translateX(4px); }
+}
+@keyframes ic-slide-l {
+  0%, 100% { transform: translateX(0); }
+  45% { transform: translateX(-4px); }
+}
+@keyframes ic-nudge {
+  0%, 100% { transform: translate(0, 0); }
+  30% { transform: translate(2px, -2px); }
+  65% { transform: translate(-2px, 2px); }
+}
+
+/* 預設動畫:沒有特別指定的圖示也要會動(例如自動化用的 clock)。
+   用 :where() 讓它的特異性低於上面那些具名規則,具名的還是優先。 */
+.ic-anim > svg:where(.lucide) {
+  animation: ic-pop 0.8s ease-in-out infinite;
+}
+.ic-anim > svg.lucide-clock { animation: ic-spin 1.8s linear infinite; }
+.ic-anim > svg.lucide-archive { animation: ic-bob 0.8s ease-in-out infinite; }
+.ic-anim > svg.lucide-star { animation: ic-swing 0.9s ease-in-out infinite; }
+.ic-anim > svg.lucide-plus { animation: ic-turn 0.7s ease-in-out infinite; }
+.ic-anim > svg.lucide-arrow-left { animation: ic-slide-l 0.7s ease-in-out infinite; }

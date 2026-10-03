@@ -1,0 +1,30 @@
+appId: com.telegram.rma
+productName: Telegram-RMA
+directories:
+  output: dist
+  buildResources: resources
+files:
+  - out/**/*
+  - package.json
+  # 系統匣圖示執行時要讀得到(視窗圖示也用同一份)
+  - resources/icon.ico
+  - resources/icon.png
+asar: true
+asarUnpack:
+  - "**/node_modules/telegram/**"
+win:
+  icon: resources/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+nsis:
+  artifactName: ${productName}-Setup-${version}.${ext}
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  perMachine: false
+portable:
+  artifactName: ${productName}-Portable-${version}.${ext}

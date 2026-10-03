@@ -1,0 +1,53 @@
+# 推 v* 標籤（例如 v1.2.0）→ 在 GitHub 雲端打包 Windows 安裝版與免安裝版，自動發 Release。
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: 安裝依賴
+        run: npm ci
+
+      - name: 檢查標籤與 package.json 版本一致
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          PKG="v$(node -p "require('./package.json').version")"
+          if [ "$PKG" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::標籤 $GITHUB_REF_NAME 與 package.json 版本 $PKG 不一致"; exit 1
+          fi
+
+      - name: 建置
+        run: npm run build
+
+      - name: 打包（NSIS 安裝版＋免安裝版）
+        run: npx electron-builder --win --publish never
+
+      - name: 上傳打包結果
+        uses: actions/upload-artifact@v4
+        with:
+          name: Telegram-RMA-windows
+          path: dist/*.exe
+
+      - name: 發佈 Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          body_path: .github/RELEASE_BODY.md
+          files: dist/*.exe
